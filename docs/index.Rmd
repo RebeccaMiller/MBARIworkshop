@@ -26,7 +26,7 @@ summary(cars)
 library(tidyverse)
 ##data from r
 mpg
-g <- ggplot(data= mpg, aes(x = displ, y=hwy))  ## g object is 
+g <- ggplot(data= mpg, aes(x = displ, y=hwy))   ## g object is 
 g+ geom_point()
 
 
@@ -36,12 +36,22 @@ g+ geom_point()
 ## i want color
 
 
+```{r}
+g + geom_point(aes(color = class))
+```
+
+
+## i want SHAPE
+
+
+```{r}
+g + geom_point(aes(shape = class))
+```
 
 
 
 
-
-
+##shape size
 
 
 
