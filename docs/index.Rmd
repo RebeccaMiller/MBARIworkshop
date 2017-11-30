@@ -105,3 +105,67 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+### Data Wrangling with 'dplyr'
+```{r}
+library(tidyverse)
+##click on raw button on github csv file to read.  wierd
+
+gapminder <- readr::read_csv("https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv")
+
+
+gapminder
+
+## useful functions to get to know
+
+head(gapminder)  ##show first 6 rows
+tail(gapminder)  ##show last 6 rows
+
+head(gapminder, 20)  #say how many rows
+tail(gapminder, 20)
+
+str(gapminder)  ##structure of gapminder data
+
+names(gapminder) ##returns column headers
+
+dim(gapminder)  ##returns the number of records
+
+ncol(gapminder)
+nrow(gapminder)
+
+c(nrow(gapminder), ncol(gapminder))  #c means column?
+
+summary(gapminder)  ##summary stats
+
+##everything above we did to entire gapminder dataset
+
+##to look at indvidual columns
+head(gapminder$lifeExp)
+
+
+```
+
+
+
+##working with dplyr
+```{r}
+##mutate create new variables with functions of existing values
+
+filter (gapminder, lifeExp < 29)  ##subsetting data
+filter(gapminder, country == "Mexico")
+
+Swedes <-filter(gapminder, country == "Sweden")
+
+mean(Swedes$lifeExp)
+
+## pipe operator '%>%' cnrl, shift, m  %>%   think of 'and then' as a 'pipe', why is this cool? see below
+
+gapminder %>% filter(country == "Sweeden") %>% summarize(mean(lifeExp))
+
+
+
+```
+
