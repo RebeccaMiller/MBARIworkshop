@@ -68,16 +68,18 @@ What’s gone wrong with this code?
       geom_point(aes(x = displ, y = hwy) color = "blue")
       
       
-```{r}
-ggplot(data = mpg, aes(x=hwy, y= displ, size= class, color, cty)) + geom_point (alpha =0.2, color = 'blue')
+```{r name1}
+ggplot(data = mpg, aes(x=hwy, y= displ)) + 
+geom_point (alpha =0.2, color = 'blue')
 
-ggplot(data = mpg, aes(x=hwy, y= displ, size= class, color, cty)) + geom_point (alpha =0.2, color =  displ < 5)
+###ggplot(data = mpg, aes(x=hwy, y= displ, size= class)) + 
+###geom_point (alpha =0.2, color =  displ < 5)
 
 ```
  
  
  ##Geoms
-```{r}
+```{r name2}
 
 ggplot(mpg, aes(x = drv, y = hwy))+ 
 geom_violin() #violin plot
