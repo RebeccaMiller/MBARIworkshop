@@ -2,17 +2,19 @@
 title: "index"
 author: "Rebecca"
 date: "November 30, 2017"
-output:html_document:
-code_folding: hide
-toc: true
-toc_float: true
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+##R Markdown
+##RMarkdown2
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
@@ -154,7 +156,7 @@ head(gapminder$lifeExp)
 ```{r}
 ##mutate create new variables with functions of existing values
 
-filter (gapminder, lifeExp < 29)  ##subsetting data
+filter(gapminder, lifeExp < 29)  ##subsetting data
 filter(gapminder, country == "Mexico")
 
 Swedes <-filter(gapminder, country == "Sweden")
@@ -163,9 +165,214 @@ mean(Swedes$lifeExp)
 
 ## pipe operator '%>%' cnrl, shift, m  %>%   think of 'and then' as a 'pipe', why is this cool? see below
 
-gapminder %>% filter(country == "Sweeden") %>% summarize(mean(lifeExp))
+gapminder %>% filter(country == "Sweden") %>% summarize(mean(lifeExp))
+
+##select by columns
+ select(gapminder, year, lifeExp) #or##
+ 
+ ##ReMOVE columns you dont want
+ gapminder %>% 
+ filter (country =="Cambodia") %>% 
+  select(-continent, -lifeExp)
+  
+##a few morethings with filters
+gapminder %>% 
+  filter(country =="Mexico", 
+            year == 2002)
+            
+            
+##mutate functions to add columns
+
+gapminder %>% 
+  mutate(gdp = pop * gdpPercap)
+  
+  ##add an index column
+  
+  gapminder %>% 
+  mutate(index = 1:nrow(gapminder)) %>% 
+  
+  tail()
+  
+  ## above 2 statements could also looke like this...
+  gapminder %>% 
+  mutate(gdp = pop * gdpPercap,
+        index = 1:nrow(gapminder)) %>% 
+    tail()
+
+gapminder %>% 
+filter(country %in% c("Egypt","Vietnam"))
+
+gapminder %>% 
+filter(country %in% c("Egypt","Vietnam")) %>% 
+        mutate(max_gdpPercap=max(gdpPercap)) %>% 
+        summarize(max(gdpPercap))
+
+##group by () so that we can get 2 max
+
+gapminder %>% 
+filter(country %in% c("Egypt","Vietnam")) %>% 
+group_by(country) %>% 
+summarise(max_gpdPercap = max(gdpPercap)) %>% 
+arrange(max_gpdPercap)
+
+##all countries
+gapminder %>%
+group_by(country) %>% 
+summarise(max_gpdPercap = max(gdpPercap))%>% 
+arrange(max_gpdPercap)
+
+
 
 
 
 ```
+
+
+##Day 2 MBARI workshop , joining datasets  
+```{r}
+##dplyr::left_join(a,b, by"x1")  , left means 'a'  or you could re order dplyer::right_join(b,a, by "x1"), right joining 'a'
+
+##read CO2 emissions
+library(tidyverse)
+Co2<- read_csv("https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/co2.csv")
+
+Co2 %>% head()
+Co2 %>% str()
+
+#create new variable with only gapminder 2007 data
+gap_2007 <- gapminder %>% 
+          filter(year==2007)
+          
+gap_2007 %>% head()          
+gap_2007 %>% str()
+
+##leftjoin gap 2007 to co2
+
+ljoin<- left_join(gap_2007, Co2, by = "country")
+
+ljoin %>% (dim)
+
+##right join
+rjoin <-right_join(gap_2007,Co2)
+rjoin %>% dim()
+##rjoin %>% View()  View doesn't work in Knit, so have to comment out if you want to post to knit/internet
+
+```
+
+
+
+##TidyR
+
+# example datasets
+
+```{r}
+mpg
+AirPassengers
+
+##'gather' columns into rows, 'spread' rows into columns
+
+gap_wide <- readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder_wide.csv')
+
+gap_wide %>% View()
+
+gapminder <- readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv')
+
+
+##gather Use gather to turn 'gap_wide' into a long format data
+
+?gather
+
+
+gap_long <- gap_wide %>% 
+            gather(key = obstype_year,
+                   value = obs_values,
+                   dplyr::starts_with("pop"),
+                   dplyr::starts_with("lifeExp"),
+                   dplyr::starts_with("gdpPercap"))
+                  
+head(gap_long)
+                   ##The :: indicates that starts_with comes from the dplyr package
+                   
+                   
+unique(gap_long$obstype_year)
+
+##below code does the same thing
+gap_long <- gap_wide %>% 
+          gather (key =obstype_year,
+          value = obs_valu,
+            -continent, -country)
+            
+head(gap_long)
+
+
+
+##seperate out the year
+gap_long <- gap_wide %>% 
+          gather (key =obstype_year,
+          value = obs_valu,
+            -continent, -country) %>% 
+    separate(obstype_year,
+            into =c("obs_type","year"),
+            sep= "_", convert=TRUE)
+            
+head(gap_long)
+            
+
+##Plot long format data
+
+life_df <-gap_long %>% 
+        filter(obs_type=="lifeExp", continent == "Americas")
+head(life_df)
+
+ggplot(data = life_df, aes(x=year, y = obs_valu, color=country)) +
+    geom_line()
+    
+
+
+    life_df <-gap_long %>% 
+        filter(obs_type=="lifeExp", continent == "Americas")
+head(life_df)
+
+ggplot(data = life_df, aes(x=year, y = obs_valu, color=country)) +
+    geom_line()
+
+### only use data from 1982 for each continent
+
+
+life_Exp<-gap_long %>% 
+    filter(obs_type=="lifeExp", year >1981)  %>% 
+    group_by(continent, year) %>% 
+    summarise(means = mean(obs_valu))
+    
+    head(life_Exp)
+
+ ggplot(data = life_Exp, aes(x=year, y = means, color=continent)) +
+    geom_line()  +
+    labs(title = "life expectancy",
+    x= "year", 
+    y= "age",
+    color = "continent")
+    
+ggplot(data = life_Exp, aes(x=year, y = means, color=continent)) +
+    geom_boxplot() 
+    
+   
+ 
+    
+      
+
+```
+
+##spread
+
+```{r}
+##spread long data, make wide
+head(gap_long)
+
+gap_normal <-gap_long %>% 
+spread(key =obs_type, value = obs_valu)  ##values you want to spread out
+
+head(gap_normal)
+```
+
 
